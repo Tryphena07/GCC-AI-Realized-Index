@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -98,9 +98,9 @@ const AdminLogin = () => {
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
         Not an admin?{" "}
-        <a href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
+        <Link to="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
           User login
-        </a>
+        </Link>
       </p>
     </AuthLayout>
   );
