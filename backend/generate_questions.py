@@ -1,12 +1,3 @@
-"""
-Pre-generate survey questions for all persona+role combinations.
-Uploads JSON files to Azure Blob Storage.
-
-Usage:
-    cd backend
-    python generate_questions.py
-"""
-
 import os
 import json
 import time
