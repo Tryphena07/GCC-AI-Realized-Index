@@ -24,8 +24,8 @@ async def save_user_profile(profile: UserProfile):
     try:
         db = get_db()
         doc_ref = db.collection("users").document(profile.uid)
-        doc_ref.set(
-            {
+        doc = doc_ref.get()
+        data = {
                 "name": profile.name,
                 "email": profile.email,
                 "company": profile.company,
@@ -33,9 +33,10 @@ async def save_user_profile(profile: UserProfile):
                 "gcc_size": profile.gcc_size,
                 "parent_industry": profile.parent_industry,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
-            },
-            merge=True,
-        )
+            }
+        if not doc.exists:
+            data["role"] = "user"
+        doc_ref.set(data, merge=True)
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

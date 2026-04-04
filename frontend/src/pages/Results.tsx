@@ -172,7 +172,7 @@ const Results = () => {
   const medianPct = ((BENCHMARK.median - 1) / 4) * 100;
 
   return (
-    <div className="min-h-screen bg-mesh-gradient p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-mesh-gradient px-3 py-6 sm:p-6 relative overflow-hidden">
       <div className="orb orb-gold w-[350px] h-[350px] top-[5%] right-[-5%]" />
       <div className="orb orb-blue w-[300px] h-[300px] bottom-[-5%] left-[-5%]" />
       <div className="bg-grid-pattern absolute inset-0 opacity-20 pointer-events-none" />
@@ -186,7 +186,7 @@ const Results = () => {
               Your GARIX Profile
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
             Indicative AI Readiness Score
           </h1>
           <p className="text-sm text-muted-foreground max-w-2xl">
@@ -197,7 +197,7 @@ const Results = () => {
         </div>
 
         {/* ═══ Section 1: Radar + Composite + Dimension Bars ═══ */}
-        <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm p-6 mb-8">
+        <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm p-4 sm:p-6 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left: Radar Chart */}
             <div>
@@ -255,8 +255,8 @@ const Results = () => {
                   const pct = (d.score / 5) * 100;
                   const isWeighted = d.weight > 1;
                   return (
-                    <div key={d.dimension_id} className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 w-[160px] shrink-0">
+                    <div key={d.dimension_id} className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-1.5 w-[100px] sm:w-[160px] shrink-0">
                         <span className="text-sm">{DIMENSION_ICONS[d.dimension_id]}</span>
                         <span className="text-xs font-medium text-foreground truncate">
                           {d.dimension_name}
@@ -290,7 +290,7 @@ const Results = () => {
 
         {/* ═══ Section 2: What Each Dimension Looks Like (AI-generated) ═══ */}
         {insights && Object.keys(insights).length > 0 && (
-          <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm p-6 mb-8">
+          <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm p-4 sm:p-6 mb-8">
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-6">
               What Each Dimension Looks Like at Your Stage
             </h3>
@@ -325,7 +325,7 @@ const Results = () => {
         )}
 
         {/* ═══ Section 3: Maturity Stage Map ═══ */}
-        <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm p-6 mb-8">
+        <div className="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-sm p-4 sm:p-6 mb-8">
           <p className="text-xs text-muted-foreground mb-4">
             Your GARIX score benchmarked against EY's India GCC cohort — filtered by industry and GCC size.
           </p>
@@ -369,9 +369,9 @@ const Results = () => {
             {/* Stage labels */}
             <div className="flex justify-between mt-4">
               {STAGES.map((s) => (
-                <div key={s.stage} className="text-center flex-1">
-                  <p className="text-[10px] font-semibold text-muted-foreground">{s.label}</p>
-                  <p className="text-[9px] text-muted-foreground/60">{s.range}</p>
+                <div key={s.stage} className="text-center flex-1 min-w-0">
+                  <p className="text-[8px] sm:text-[10px] font-semibold text-muted-foreground truncate">{s.label}</p>
+                  <p className="text-[7px] sm:text-[9px] text-muted-foreground/60">{s.range}</p>
                 </div>
               ))}
             </div>
@@ -384,38 +384,38 @@ const Results = () => {
 
           <div className="space-y-3">
             {/* Your score */}
-            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 p-4">
-              <div className="h-3 w-3 rounded-full bg-muted-foreground/50" />
-              <span className="text-sm font-medium text-foreground flex-1">Your GARIX Score</span>
-              <span className="text-lg font-bold text-foreground">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4">
+              <div className="h-3 w-3 rounded-full bg-muted-foreground/50 shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-foreground flex-1 min-w-0">Your GARIX Score</span>
+              <span className="text-base sm:text-lg font-bold text-foreground">
                 {scores.composite_score.toFixed(1)}
               </span>
             </div>
 
             {/* Leading quartile */}
-            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 p-4">
-              <div className="h-3 w-3 rounded-full bg-muted-foreground/50" />
-              <span className="text-sm font-medium text-foreground flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4">
+              <div className="h-3 w-3 rounded-full bg-muted-foreground/50 shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-foreground flex-1 min-w-0">
                 India GCC — Leading quartile
               </span>
-              <span className="text-lg font-bold text-foreground">
+              <span className="text-base sm:text-lg font-bold text-foreground">
                 {BENCHMARK.leading_quartile.toFixed(1)}
               </span>
-              <span className="text-xs font-bold text-emerald-400 ml-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5">
+              <span className="text-[10px] sm:text-xs font-bold text-emerald-400 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5">
                 +{(BENCHMARK.leading_quartile - scores.composite_score).toFixed(1)} ahead
               </span>
             </div>
 
             {/* Median */}
-            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 p-4">
-              <div className="h-3 w-3 rounded-full bg-yellow-500" />
-              <span className="text-sm font-medium text-foreground flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4">
+              <div className="h-3 w-3 rounded-full bg-yellow-500 shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-foreground flex-1 min-w-0">
                 India GCC — Median
               </span>
-              <span className="text-lg font-bold text-foreground">
+              <span className="text-base sm:text-lg font-bold text-foreground">
                 {BENCHMARK.median.toFixed(1)}
               </span>
-              <span className={`text-xs font-bold ml-2 rounded-full border px-2 py-0.5 ${
+              <span className={`text-[10px] sm:text-xs font-bold rounded-full border px-2 py-0.5 ${
                 scores.composite_score >= BENCHMARK.median
                   ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
                   : "text-yellow-400 border-yellow-500/30 bg-yellow-500/10"
@@ -427,15 +427,15 @@ const Results = () => {
             </div>
 
             {/* Lagging quartile */}
-            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 p-4">
-              <div className="h-3 w-3 rounded-full bg-muted-foreground/50" />
-              <span className="text-sm font-medium text-foreground flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4">
+              <div className="h-3 w-3 rounded-full bg-muted-foreground/50 shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-foreground flex-1 min-w-0">
                 India GCC — Lagging quartile
               </span>
-              <span className="text-lg font-bold text-foreground">
+              <span className="text-base sm:text-lg font-bold text-foreground">
                 {BENCHMARK.lagging_quartile.toFixed(1)}
               </span>
-              <span className={`text-xs font-bold ml-2 rounded-full border px-2 py-0.5 ${
+              <span className={`text-[10px] sm:text-xs font-bold rounded-full border px-2 py-0.5 ${
                 scores.composite_score >= BENCHMARK.lagging_quartile
                   ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
                   : "text-red-400 border-red-500/30 bg-red-500/10"
@@ -447,15 +447,15 @@ const Results = () => {
             </div>
 
             {/* Banking sector average */}
-            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 p-4">
-              <div className="h-3 w-3 rounded-full bg-muted-foreground/50" />
-              <span className="text-sm font-medium text-foreground flex-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4">
+              <div className="h-3 w-3 rounded-full bg-muted-foreground/50 shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-foreground flex-1 min-w-0">
                 Banking sector average
               </span>
-              <span className="text-lg font-bold text-foreground">
+              <span className="text-base sm:text-lg font-bold text-foreground">
                 {BENCHMARK.sector_average.toFixed(1)}
               </span>
-              <span className={`text-xs font-bold ml-2 rounded-full border px-2 py-0.5 ${
+              <span className={`text-[10px] sm:text-xs font-bold rounded-full border px-2 py-0.5 ${
                 scores.composite_score >= BENCHMARK.sector_average
                   ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
                   : "text-yellow-400 border-yellow-500/30 bg-yellow-500/10"
@@ -469,7 +469,7 @@ const Results = () => {
         </div>
 
         {/* Contextual Callout */}
-        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 backdrop-blur-sm p-6 mb-8">
+        <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 backdrop-blur-sm p-4 sm:p-6 mb-8">
           <p className="text-sm text-muted-foreground leading-relaxed">
             <span className="font-bold text-yellow-400">
               {scores.composite_score < BENCHMARK.median
@@ -484,11 +484,11 @@ const Results = () => {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pb-8">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pb-8">
           <Button
             variant="ghost"
             size="lg"
-            className="text-muted-foreground hover:text-foreground group"
+            className="text-muted-foreground hover:text-foreground group w-full sm:w-auto"
             onClick={() => navigate("/designation")}
           >
             <RotateCcw className="h-4 w-4 mr-1" />
@@ -497,7 +497,7 @@ const Results = () => {
           <Button
             variant="ey"
             size="lg"
-            className="shimmer"
+            className="shimmer w-full sm:w-auto"
             onClick={() => navigate("/roadmap", { state: { scores, insights, persona, role, answers } })}
           >
             Get your AI roadmap

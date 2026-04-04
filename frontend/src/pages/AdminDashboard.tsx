@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth } from "@/lib/firebase";
 import {
   Users,
   FileBarChart,
@@ -194,24 +195,29 @@ const AdminDashboard = () => {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [tab, setTab] = useState<"overview" | "surveys" | "users" | "reports">("overview");
 
-  const token = sessionStorage.getItem("admin_token");
-
   useEffect(() => {
-    if (!token) {
+    const user = auth.currentUser;
+    if (!user) {
       navigate("/admin");
       return;
     }
     fetchAll();
   }, []);
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+  async function getHeaders() {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Not authenticated");
+    const token = await user.getIdToken();
+    return {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+  }
 
   async function fetchAll() {
     setLoading(true);
     try {
+      const headers = await getHeaders();
       const [statsRes, surveysRes, usersRes, roadmapsRes, reportsRes] = await Promise.all([
         fetch(`${API_BASE}/api/admin/stats`, { headers }),
         fetch(`${API_BASE}/api/admin/surveys`, { headers }),
@@ -249,7 +255,7 @@ const AdminDashboard = () => {
 
   async function handleLogout() {
     try {
-      await fetch(`${API_BASE}/api/admin/logout`, { method: "POST", headers });
+      await auth.signOut();
     } catch { /* ignore */ }
     sessionStorage.removeItem("admin_token");
     navigate("/admin");
@@ -1112,9 +1118,10 @@ const AdminDashboard = () => {
                         className="w-full h-9 rounded-xl border-primary/20 text-primary hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all"
                         onClick={async () => {
                           try {
+                            const hdrs = await getHeaders();
                             const res = await fetch(
                               `${API_BASE}/api/admin/reports/${r.id}/download`,
-                              { headers }
+                              { headers: hdrs }
                             );
                             if (!res.ok) throw new Error("Download failed");
                             const blob = await res.blob();

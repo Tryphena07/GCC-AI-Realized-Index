@@ -25,6 +25,27 @@ const Login = () => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Block admin from using user login — check role in Firestore via backend
+      try {
+        const idToken = await userCredential.user.getIdToken();
+        const verifyRes = await fetch(`${API_BASE}/api/admin/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        if (verifyRes.ok) {
+          // This is an admin account — reject from user login
+          await auth.signOut();
+          toast.error("Admin accounts must use the admin login.");
+          return;
+        }
+      } catch {
+        // verify failed = not admin, proceed normally
+      }
+
       toast.success("Signed in successfully!");
 
       // Check if user has past survey results
