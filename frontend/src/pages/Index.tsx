@@ -53,7 +53,7 @@ const Index = () => {
   Benchmark your GCC's
   <span className="text-ey-gradient text-glow block mt-2">AI realization</span>
 </h1>
-<div className="inline-flex items-center rounded-2xl border-2 border-primary/30 bg-primary/10 backdrop-blur-md px-7 py-3.5 mb-6 shadow-xl shadow-primary/10">
+<div className="inline-flex items-center rounded-2xl border-2 border-primary/30 bg-primary/10 backdrop-blur-md px-7 py-3.5 mb-6 shadow-xl shadow-primary/10 animate-fade-in" style={{ animationDelay: '0.28s' }}>
    <span className="text-lg sm:text-xl font-extrabold text-primary">
       In under 10 minutes
    </span>
