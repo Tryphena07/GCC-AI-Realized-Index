@@ -62,11 +62,18 @@ class QuestionResponse(BaseModel):
     questions: list[DimensionQuestion]
 
 
+# Map roles that share a question set with another role
+ROLE_ALIASES = {
+    "CIO": "CTO/VP Engineering",
+}
+
+
 @router.post("/questions", response_model=QuestionResponse)
 async def get_questions(request: QuestionRequest):
     """Fetch pre-generated questions from Azure Blob Storage."""
     container_name = os.getenv("BLOB_CONTAINER_NAME", "gcc-ai")
-    blob_name = f"questions/{_slugify(request.persona)}_{_slugify(request.role)}.json"
+    resolved_role = ROLE_ALIASES.get(request.role, request.role)
+    blob_name = f"questions/{_slugify(request.persona)}_{_slugify(resolved_role)}.json"
 
     try:
         blob_service = _get_blob_service()

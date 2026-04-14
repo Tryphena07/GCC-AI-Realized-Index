@@ -53,7 +53,7 @@ A full-stack AI survey application that assesses organizational readiness using 
 
 ```bash
 git clone https://github.com/ImMansur/flow-prime-design.git
-cd flow-prime-design
+cd GCC AI Realized Index
 ```
 
 ### 2. Set up environment variables

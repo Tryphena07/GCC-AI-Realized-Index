@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +13,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,21 +22,30 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/login`, {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await userCredential.user.getIdToken();
+
+      // Verify with backend that this user is the admin
+      const res = await fetch(`${API_BASE}/api/admin/verify`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.detail || "Invalid credentials");
+        throw new Error(err.detail || "Not authorized as admin");
       }
-      const data = await res.json();
-      sessionStorage.setItem("admin_token", data.token);
+
+      sessionStorage.setItem("admin_token", idToken);
       toast.success("Admin login successful!");
       navigate("/admin/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Login failed");
+      const msg = error?.code === "auth/invalid-credential"
+        ? "Invalid email or password"
+        : error?.message || "Login failed";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -43,24 +54,32 @@ const AdminLogin = () => {
   return (
     <AuthLayout
       title="Admin Portal"
-      subtitle="Sign in with your MD credentials to access the admin dashboard"
+      subtitle="Sign in with your admin credentials to access the dashboard"
     >
       <div className="flex items-center gap-2 mb-6 p-3 rounded-lg border border-primary/20 bg-primary/5">
         <ShieldCheck className="h-5 w-5 text-primary" />
-        <span className="text-sm text-muted-foreground">Restricted access — MD credentials required</span>
+        <span className="text-sm text-muted-foreground">Restricted access — Admin credentials required</span>
+      </div>
+
+      <div className="mb-6 px-4 py-3 rounded-lg border border-dashed border-yellow-500/30 bg-yellow-500/5">
+        <p className="text-[10px] uppercase tracking-wider font-semibold text-yellow-500 mb-2">Demo credentials — will be removed in production</p>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span><span className="font-medium text-foreground">Email:</span> admin@gmail.com</span>
+          <span><span className="font-medium text-foreground">Password:</span> admin123</span>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Username
+          <Label htmlFor="email" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Email
           </Label>
           <Input
-            id="username"
-            type="text"
-            placeholder="Enter admin username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            id="email"
+            type="email"
+            placeholder="Enter admin email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="h-11 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/30"
             required
           />

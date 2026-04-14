@@ -1,16 +1,17 @@
 import os
-import hmac
-import hashlib
-import secrets
-import time
 import json
 from io import BytesIO
 from fastapi import APIRouter, HTTPException, Depends, Header
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
+from firebase_admin import auth as firebase_auth
 
 from app.firebase import get_db
+
+
+# Admin email allowed to access the dashboard
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@gmail.com")
 
 
 def _get_blob_service():
@@ -30,68 +31,41 @@ def _get_blob_service():
 
 router = APIRouter()
 
-# ── Hardcoded MD admin credentials ──
-ADMIN_USERNAME = "md_admin"
-ADMIN_PASSWORD = "GarixMD@2026"
-
-# Secret key for signing tokens (stable across serverless invocations)
-_TOKEN_SECRET = os.getenv("ADMIN_TOKEN_SECRET", "garix-admin-secret-key-2026")
-_TOKEN_TTL = 24 * 60 * 60  # 24 hours
-
-
-class AdminLogin(BaseModel):
-    username: str
-    password: str
-
-
-def _create_token() -> str:
-    """Create a signed token that can be verified without server-side state."""
-    payload = f"{ADMIN_USERNAME}:{int(time.time())}"
-    sig = hmac.new(_TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    return f"{payload}:{sig}"
-
-
-def _verify_token(token: str) -> bool:
-    """Verify a signed token."""
-    parts = token.rsplit(":", 1)
-    if len(parts) != 2:
-        return False
-    payload, sig = parts
-    expected_sig = hmac.new(_TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(sig, expected_sig):
-        return False
-    # Check TTL
-    try:
-        ts = int(payload.split(":")[1])
-        if time.time() - ts > _TOKEN_TTL:
-            return False
-    except (IndexError, ValueError):
-        return False
-    return True
-
 
 def verify_admin_token(authorization: Optional[str] = Header(None)):
-    """Dependency to verify admin bearer token."""
+    """Dependency to verify Firebase ID token and check admin email."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid token")
-    token = authorization.split(" ", 1)[1]
-    if not _verify_token(token):
+    id_token = authorization.split(" ", 1)[1]
+    try:
+        # Ensure Firebase app is initialized by calling get_db
+        db = get_db()
+        decoded = firebase_auth.verify_id_token(id_token)
+    except Exception as e:
+        print(f"[ADMIN] Token verification error: {e}")
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-    return token
+    email = decoded.get("email", "")
+    uid = decoded.get("uid", "")
+    # Check role in Firestore
+    try:
+        doc = db.collection("users").document(uid).get()
+        role = doc.to_dict().get("role", "") if doc.exists else ""
+    except Exception:
+        role = ""
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized as admin")
+    return decoded
 
 
-@router.post("/admin/login")
-async def admin_login(creds: AdminLogin):
-    """Authenticate admin with hardcoded MD credentials."""
-    if creds.username != ADMIN_USERNAME or creds.password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = _create_token()
-    return {"status": "ok", "token": token}
+@router.post("/admin/verify")
+async def admin_verify(decoded=Depends(verify_admin_token)):
+    """Verify the Firebase ID token belongs to the admin."""
+    return {"status": "ok", "email": decoded.get("email")}
 
 
 @router.post("/admin/logout")
-async def admin_logout(token: str = Depends(verify_admin_token)):
-    """Invalidate the admin token (client should discard the token)."""
+async def admin_logout(decoded=Depends(verify_admin_token)):
+    """Admin logout (client should discard the token)."""
     return {"status": "ok"}
 
 

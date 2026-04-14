@@ -25,6 +25,27 @@ const Login = () => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Block admin from using user login — check role in Firestore via backend
+      try {
+        const idToken = await userCredential.user.getIdToken();
+        const verifyRes = await fetch(`${API_BASE}/api/admin/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        if (verifyRes.ok) {
+   // user is admin → send to admin dashboard
+   toast.success("Admin login successful");
+   navigate("/admin/dashboard");
+   return;
+}
+      } catch {
+        // verify failed = not admin, proceed normally
+      }
+
       toast.success("Signed in successfully!");
 
       // Check if user has past survey results
@@ -63,30 +84,7 @@ const Login = () => {
       subtitle="Sign in to access your GARIX assessment dashboard"
     >
       {/* Role toggle */}
-      <div className="flex rounded-lg border border-border/50 bg-white/[0.02] backdrop-blur-sm p-1 mb-6">
-        <button
-          type="button"
-          onClick={() => setRole("user")}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-            role === "user"
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          User Login
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate("/admin")}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-            role === "admin"
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Admin Login
-        </button>
-      </div>
+      
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
